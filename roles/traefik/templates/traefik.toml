@@ -1,0 +1,50 @@
+logLevel = "ERROR"
+debug = true
+
+defaultEntryPoints = ["https","http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+  [entryPoints.https.tls]
+
+
+
+[acme]
+storage = "acme.json"
+entryPoint = "https"
+email = "roberto.barbosa@prime.cv"
+#caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
+caServer = "https://acme-v02.api.letsencrypt.org/directory"
+onHostRule = true
+onDemand = false
+
+[acme.httpChallenge]
+  entryPoint = "http"
+
+
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+domain = "docker.localhost"
+watch = true
+exposedByDefault = false
+
+[traefikLog]
+filePath = "/var/log/traefik/traefik.log"
+
+[accessLog]
+filepath = "/var/log/traefik/access.log"
+
+[api]
+entryPoint = "traefik"
+dashboard = true
+
+[[acme.domains]]
+main = "{{ domain_name }}"
+sans = ["{{ domain_name }}","www.{{ domain_name }}"]
+

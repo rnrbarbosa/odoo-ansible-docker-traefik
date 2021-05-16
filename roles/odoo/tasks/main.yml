@@ -1,0 +1,35 @@
+---
+- name: Copy addons to Server - Deploy Decision that addons directories are not on Docker Volume for easier update!!! 
+  copy:
+    src: files/addons
+    dest: /app/
+
+- name: Create Odoo volume
+  docker_volume:
+    name: odoo-web-data
+
+- name: Create Odoo Container
+  docker_container:
+    state: 'started'
+    recreate: yes
+    name: 'odoo'
+    image: "odoo:{{ odoo_version }}"
+    labels:
+      traefik.frontend.rule: "Host:{{ domain_name }},www.{{ domain_name }}"
+      traefik.admin.port: "8069"
+      traefik.docker.network: "proxy"
+      traefik.enable: "true"
+    networks:
+    - name: "proxy"
+    ports:
+      - 8069
+    env:
+      HOST: 'db'
+      USER: "{{ postgres_user }}"
+      PASSWORD: "{{ postgres_pass }}"
+    links:
+      - 'db'  # Depends on Docker Container named 'db'
+    volumes:
+      - "/app/addons/:/mnt/extra-addons" # Mounted from a local Folder
+      - "odoo-web-data:/var/lib/odoo" # Mounted from a Docker Volume
+...

@@ -1,0 +1,35 @@
+---
+- name: Create PGDATA volume
+  docker_volume:
+    name: odoo-db-data
+
+- name: Create PGBACKUP volume
+  docker_volume:
+    name: odoo-db-backup
+
+- name: Create database Container
+  docker_container:
+    name: 'db'  # Role 'odoo' depends on this container name
+    image: 'postgres:9.5-alpine'
+    networks:
+    - name: "proxy"
+    state: 'started'
+    volumes:
+    - odoo-db-data:/var/lib/postgresql/data
+    - odoo-db-backup:/mnt/backup
+    env:
+      POSTGRES_USER: "{{ postgres_user }}"
+      POSTGRES_PASSWORD: "{{ postgres_pass }}"
+  register: db_cont_metadata
+
+- name: Wait for postgres to accept connections
+  wait_for:
+    host: '{{ db_cont_metadata["ansible_facts"]["docker_container"]["NetworkSettings"]["IPAddress"] }}'
+    port: 5432
+    state: drained
+    connect_timeout: 1
+    timeout: 30
+  register: postgres_running
+  until: postgres_running is success
+  retries: 10
+...

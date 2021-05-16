@@ -1,0 +1,23 @@
+domain_name: "abc.com"
+maintainer_email: "rnrbarbosa@gmail.com"
+odoo_version: "14"
+
+postgres_user: "mydb"
+postgres_pass: 'mypass'
+#--------------------------------------------
+
+traefik_https: truetraefik_dir
+traefik_users_basic_auth: admin
+traefik_certificates: []
+traefik_docker_domain: "{{ domain_name }}"
+traefik_group: root
+traefik_dir: /app/traefik
+traefik_network: traefik
+traefik_user: root
+traefik_volumes: []
+
+acme_email: "{{ maintainer_email }}"
+acme_domains:
+  - domain: "{{ domain_name }}"
+    sans:
+      - "www.{{ domain_name }}"

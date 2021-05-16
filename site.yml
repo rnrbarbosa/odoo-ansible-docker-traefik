@@ -1,0 +1,19 @@
+---
+- name: Deploy Odoo/PgSQL/Traefik
+  hosts: localhost # or another host that you can ssh paswordless
+  tasks:
+  - name: Traefik
+    import_role:
+      name: traefik
+    tags: traefik
+
+  - name: PostgreSQL
+    import_role:
+      name: postgresql
+    tags: postgresql
+
+  - name: Odoo
+    import_role:
+      name: odoo
+    tags: odoo
+...

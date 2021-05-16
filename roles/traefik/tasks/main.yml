@@ -1,0 +1,42 @@
+---
+- name: Make sure that the traefik directory exists
+  become: true
+  file:
+    group: "{{ traefik_group }}"
+    owner: "{{ traefik_user }}"
+    path: "{{ traefik_dir }}"
+    state: directory
+    mode: "0744"
+
+- name: Copy traefik config
+  template:
+    src: traefik.toml
+    dest: "{{ traefik_dir }}/traefik.toml"
+    force: true
+
+- name: Copy acme.json
+  copy:
+    dest: "{{ traefik_dir }}/acme.json"
+    force: false
+    mode: 0600
+    src: files/acme.json
+
+- name: Run traefik proxy
+  docker_container:
+    image: traefik:alpine
+    name: traefik
+    networks:
+      - name: proxy
+    pull: true
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    recreate: true
+    restart_policy: always
+    state: "{{ traefik_state }}"
+    volumes: 
+    - /var/run/docker.sock:/var/run/docker.sock
+    - /app/traefik/traefik.toml:/traefik.toml
+    - /app/traefik/acme.json:/acme.json 
+
